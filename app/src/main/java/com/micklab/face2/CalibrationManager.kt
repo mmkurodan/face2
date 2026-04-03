@@ -60,7 +60,12 @@ class CalibrationManager(
 
         val previous = samples.lastOrNull()
         if (previous != null && !isStable(previous, features)) {
-            samples.clear()
+            // Large head movement → full reset. Minor gaze jitter → skip frame, keep samples.
+            if (isLargeMovement(previous, features)) {
+                samples.clear()
+                lastMessage = DEFAULT_GUIDANCE
+            }
+            return currentState()
         }
 
         samples.addLast(features)
@@ -72,7 +77,7 @@ class CalibrationManager(
             baseline = buildCalibration(samples.toList())
             lastMessage = DEFAULT_COMPLETE_MESSAGE
         } else {
-            lastMessage = DEFAULT_GUIDANCE
+            lastMessage = buildProgressGuidance(samples.size, requiredSampleCount)
         }
 
         return currentState()
@@ -93,11 +98,27 @@ class CalibrationManager(
         previous: FrameFeatures,
         current: FrameFeatures,
     ): Boolean {
-        return previous.eyeCenter.distanceTo(current.eyeCenter) < 0.025f &&
-            previous.combinedLocalGaze.distanceTo(current.combinedLocalGaze) < 0.05f &&
-            abs(previous.yaw - current.yaw) < 6f &&
-            abs(previous.pitch - current.pitch) < 6f &&
-            abs(previous.roll - current.roll) < 6f
+        return previous.eyeCenter.distanceTo(current.eyeCenter) < 0.040f &&
+            previous.combinedLocalGaze.distanceTo(current.combinedLocalGaze) < 0.08f &&
+            abs(previous.yaw - current.yaw) < 8f &&
+            abs(previous.pitch - current.pitch) < 8f &&
+            abs(previous.roll - current.roll) < 8f
+    }
+
+    private fun isLargeMovement(previous: FrameFeatures, current: FrameFeatures): Boolean {
+        return previous.eyeCenter.distanceTo(current.eyeCenter) > 0.06f ||
+            abs(previous.yaw - current.yaw) > 15f ||
+            abs(previous.pitch - current.pitch) > 15f
+    }
+
+    private fun buildProgressGuidance(count: Int, required: Int): String {
+        val ratio = count.toFloat() / required.toFloat()
+        return when {
+            ratio < 0.30f -> DEFAULT_GUIDANCE
+            ratio < 0.55f -> GUIDANCE_QUARTER
+            ratio < 0.80f -> GUIDANCE_HALF
+            else -> GUIDANCE_ALMOST
+        }
     }
 
     private fun buildCalibration(samples: List<FrameFeatures>): CalibrationData {
@@ -172,6 +193,9 @@ class CalibrationManager(
     companion object {
         const val DEFAULT_REQUIRED_SAMPLES = 18
         const val DEFAULT_GUIDANCE = "Look at the center dot and keep your head steady."
+        const val GUIDANCE_QUARTER = "Good — keep your gaze on the center dot."
+        const val GUIDANCE_HALF = "Halfway there, stay still a moment longer…"
+        const val GUIDANCE_ALMOST = "Almost done, keep looking at the dot!"
         const val DEFAULT_COMPLETE_MESSAGE = "Calibration complete. Live gaze tracking is active."
     }
 }

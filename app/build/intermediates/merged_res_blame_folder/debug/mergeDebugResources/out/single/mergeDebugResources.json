@@ -1,5 +1,9 @@
 [
     {
+        "merged": "/root/.gradle/daemon/8.7/com.micklab.face2.app-debug-43:/layout_activity_main.xml.flat",
+        "source": "/root/.gradle/daemon/8.7/com.micklab.face2.app-main-45:/layout/activity_main.xml"
+    },
+    {
         "merged": "com.micklab.face2.app-debug-43:/layout_activity_main.xml.flat",
         "source": "com.micklab.face2.app-main-45:/layout/activity_main.xml"
     }

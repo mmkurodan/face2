@@ -156,11 +156,11 @@ class CalibrationManager(
     private fun buildGuidance(features: FrameFeatures): String {
         return when {
             features.leftEye == null || features.rightEye == null ->
-                "Move slightly closer so both irises stay visible."
+                "Move slightly closer until both irises stay visible."
             features.faceConfidence < minConfidence ->
-                "Hold the phone steady until the face mesh confidence rises."
+                "Hold the phone steady until the face mesh locks on."
             abs(features.yaw) >= 24f || abs(features.pitch) >= 20f || abs(features.roll) >= 18f ->
-                "Face the screen more directly while calibrating."
+                "Face the screen straight on while calibrating."
             abs(features.eyeCenter.x - 0.5f) >= 0.24f || abs(features.eyeCenter.y - 0.5f) >= 0.22f ->
                 "Center your face and keep looking at the middle dot."
             else -> DEFAULT_GUIDANCE
@@ -192,10 +192,10 @@ class CalibrationManager(
 
     companion object {
         const val DEFAULT_REQUIRED_SAMPLES = 18
-        const val DEFAULT_GUIDANCE = "Look at the center dot and keep your head steady."
-        const val GUIDANCE_QUARTER = "Good — keep your gaze on the center dot."
-        const val GUIDANCE_HALF = "Halfway there, stay still a moment longer…"
-        const val GUIDANCE_ALMOST = "Almost done, keep looking at the dot!"
+        const val DEFAULT_GUIDANCE = "Look at the center dot and keep your head and phone steady."
+        const val GUIDANCE_QUARTER = "Keep your eyes on the center dot and do not move your head."
+        const val GUIDANCE_HALF = "Keep staring at the center dot for a moment longer."
+        const val GUIDANCE_ALMOST = "Almost done, hold still and keep looking at the dot."
         const val DEFAULT_COMPLETE_MESSAGE = "Calibration complete. Live gaze tracking is active."
     }
 }

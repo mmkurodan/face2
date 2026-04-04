@@ -11,23 +11,31 @@
     <color name="panel_text_primary">#FFF9FAFB</color>
     <color name="panel_text_secondary">#FFD1D5DB</color>
     <string name="app_name">Face Gaze Tracker Demo</string>
+    <string name="calibration_dialog_start">Start</string>
+    <string name="calibration_no_face_detail">Center your face, then keep looking at the middle dot when the prompt starts.</string>
     <string name="calibration_progress">Calibration %1$d%%</string>
-    <string name="calibration_starting">Look at the center dot to calibrate</string>
+    <string name="calibration_start_dialog_message">Step 1 of 2: Center your face in the preview and keep both eyes visible.\n\nStep 2 of 2: After tapping Start, look at the center dot and keep both your head and phone as steady as possible.</string>
+    <string name="calibration_start_dialog_title">Start calibration</string>
+    <string name="calibration_starting">Look at the center dot and hold steady to calibrate</string>
+    <string name="calibration_step_format">Calibration step %1$d/%2$d</string>
+    <string name="calibration_waiting_detail">Center your face, make sure both eyes stay visible, then press Start in the popup.</string>
     <string name="grant_camera_permission">Grant camera permission</string>
     <string name="metrics_permission_help">Tap the button above to grant Camera permission. If permission was permanently denied, open the app settings and enable Camera.</string>
-    <string name="metrics_waiting">Waiting for stable face landmarks...\n\nThe app will collect a short center-fixation calibration, then estimate gaze from iris motion, pose compensation, and confidence-aware smoothing.</string>
+    <string name="metrics_waiting">Inference: -- ms\nResolution: --\nCalibration samples: --\nFace conf: --  left: --  right: --\nPose: yaw=--  pitch=--  roll=--\nAnchors: nose=(--, --) eyes=(--, --)\nRaw gaze: --\nSmooth gaze: --\nScale correction: --</string>
     <string name="open_app_settings">Open app settings</string>
     <string name="recalibrate">Recalibrate</string>
     <string name="resolution_640">VGA</string>
     <string name="resolution_720">HD</string>
     <string name="resolution_title">Resolution</string>
+    <string name="start_calibration">Start calibration</string>
     <string name="status_align_face">Align your face with the screen so both eyes stay visible.</string>
-    <string name="status_camera_ready">Front camera ready. Hold the phone comfortably and follow the on-screen calibration dot.</string>
+    <string name="status_camera_ready">Front camera ready. Hold the phone comfortably and look naturally at the screen.</string>
     <string name="status_dwell_active">Dwell detected</string>
     <string name="status_error">Error: %1$s</string>
     <string name="status_initializing">Initializing camera and face landmarker...</string>
     <string name="status_no_face">No face detected. Center one face in the preview.</string>
     <string name="status_permission_required">Camera permission is required to track gaze.</string>
+    <string name="status_ready_to_calibrate">Ready to start calibration</string>
     <string name="status_tracking">Gaze tracking live</string>
     <style name="Theme.Face2" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor" ns1:targetApi="l">#000000</item>

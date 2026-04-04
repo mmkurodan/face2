@@ -1,0 +1,111 @@
+/root/face2/app/build.gradle:52: Warning: A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.18.0 [GradleDependency]
+    implementation 'androidx.core:core-ktx:1.15.0'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:53: Warning: A newer version of androidx.appcompat:appcompat than 1.7.0 is available: 1.7.1 [GradleDependency]
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:54: Warning: A newer version of androidx.activity:activity-ktx than 1.9.3 is available: 1.13.0 [GradleDependency]
+    implementation 'androidx.activity:activity-ktx:1.9.3'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:55: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.10.0 [GradleDependency]
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:57: Warning: A newer version of com.google.android.material:material than 1.12.0 is available: 1.13.0 [GradleDependency]
+    implementation 'com.google.android.material:material:1.12.0'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:60: Warning: A newer version of androidx.camera:camera-core than 1.4.2 is available: 1.6.0 [GradleDependency]
+    implementation "androidx.camera:camera-core:$cameraxVersion"
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:61: Warning: A newer version of androidx.camera:camera-camera2 than 1.4.2 is available: 1.6.0 [GradleDependency]
+    implementation "androidx.camera:camera-camera2:$cameraxVersion"
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:62: Warning: A newer version of androidx.camera:camera-lifecycle than 1.4.2 is available: 1.6.0 [GradleDependency]
+    implementation "androidx.camera:camera-lifecycle:$cameraxVersion"
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:63: Warning: A newer version of androidx.camera:camera-view than 1.4.2 is available: 1.6.0 [GradleDependency]
+    implementation "androidx.camera:camera-view:$cameraxVersion"
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/build.gradle:65: Warning: A newer version of com.google.mediapipe:tasks-vision than 0.10.33 is available: 0.20230731 [GradleDependency]
+    implementation 'com.google.mediapipe:tasks-vision:0.10.33'
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+/root/face2/app/src/main/res/values/themes.xml:4: Warning: Unnecessary; SDK_INT is always >= 21 [ObsoleteSdkInt]
+        <item name="android:statusBarColor" tools:targetApi="l">#000000</item>
+                                            ~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/root/face2/app/src/main/res/layout/activity_main.xml:6: Warning: Possible overdraw: Root element paints background @android:color/black with a theme that also paints a background (inferred theme is @style/Theme.Face2) [Overdraw]
+    android:background="@android:color/black">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "Overdraw":
+   If you set a background drawable on a root view, then you should use a
+   custom theme where the theme background is null. Otherwise, the theme
+   background will be painted first, only to have your custom background
+   completely cover it; this is called "overdraw".
+
+   NOTE: This detector relies on figuring out which layouts are associated
+   with which activities based on scanning the Java code, and it's currently
+   doing that using an inexact pattern matching algorithm. Therefore, it can
+   incorrectly conclude which activity the layout is associated with and then
+   wrongly complain that a background-theme is hidden.
+
+   If you want your custom background on multiple pages, then you should
+   consider making a custom theme with your custom background and just using
+   that theme instead of a root element background.
+
+   Of course it's possible that your custom drawable is translucent and you
+   want it to be mixed with the background. However, you will get better
+   performance if you pre-mix the background with your drawable and use that
+   resulting image or color as a custom theme background instead.
+
+/root/face2/app/src/main/res/values/strings.xml:28: Warning: Replace "--" with an "em dash" character (—, &#8212;) ? [TypographyDashes]
+    <string name="metrics_waiting">Inference: -- ms\nResolution: --\nCalibration samples: --\nFace conf: --  left: --  right: --\nPose: yaw=--  pitch=--  roll=--\nAnchors: nose=(--, --) eyes=(--, --)\nRaw gaze: --\nSmooth gaze: --\nScale correction: --</string>
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "TypographyDashes":
+   The "n dash" (u2013, &#8211;) and the "m dash" (u2014, &#8212;) characters
+   are used for ranges (n dash) and breaks (m dash). Using these instead of
+   plain hyphens can make text easier to read and your application will look
+   more polished.
+
+   https://en.wikipedia.org/wiki/Dash
+
+/root/face2/app/src/main/res/values/strings.xml:4: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+    <string name="status_initializing">Initializing camera and face landmarker...</string>
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "TypographyEllipsis":
+   You can replace the string "..." with a dedicated ellipsis character,
+   ellipsis character (u2026, &#8230;). This can help make the text more
+   readable.
+
+   https://en.wikipedia.org/wiki/Ellipsis
+
+/root/face2/app/src/main/AndroidManifest.xml:13: Warning: Should explicitly set android:icon, there is no default [MissingApplicationIcon]
+    <application
+     ~~~~~~~~~~~
+
+   Explanation for issues of type "MissingApplicationIcon":
+   You should set an icon for the application as whole because there is no
+   default. This attribute must be set as a reference to a drawable resource
+   containing the image (for example @drawable/icon).
+
+   https://developer.android.com/studio/publish/preparing#publishing-configure
+
+0 errors, 15 warnings

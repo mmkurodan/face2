@@ -10,6 +10,7 @@ color panel_surface
 color panel_surface_strong
 color panel_text_primary
 color panel_text_secondary
+id calibrationStepTextView
 id cameraContainer
 id detailTextView
 id metricsCard
@@ -21,11 +22,18 @@ id recalibrateButton
 id resolution640Button
 id resolution720Button
 id resolutionToggleGroup
+id statusCard
 id statusTextView
 layout activity_main
 string app_name
+string calibration_dialog_start
+string calibration_no_face_detail
 string calibration_progress
+string calibration_start_dialog_message
+string calibration_start_dialog_title
 string calibration_starting
+string calibration_step_format
+string calibration_waiting_detail
 string grant_camera_permission
 string metrics_permission_help
 string metrics_waiting
@@ -34,6 +42,7 @@ string recalibrate
 string resolution_640
 string resolution_720
 string resolution_title
+string start_calibration
 string status_align_face
 string status_camera_ready
 string status_dwell_active
@@ -41,5 +50,6 @@ string status_error
 string status_initializing
 string status_no_face
 string status_permission_required
+string status_ready_to_calibrate
 string status_tracking
 style Theme.Face2

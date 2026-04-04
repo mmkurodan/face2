@@ -26,6 +26,9 @@ public final class ActivityMainBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
+  public final TextView calibrationStepTextView;
+
+  @NonNull
   public final FrameLayout cameraContainer;
 
   @NonNull
@@ -59,16 +62,22 @@ public final class ActivityMainBinding implements ViewBinding {
   public final MaterialButtonToggleGroup resolutionToggleGroup;
 
   @NonNull
+  public final MaterialCardView statusCard;
+
+  @NonNull
   public final TextView statusTextView;
 
   private ActivityMainBinding(@NonNull ConstraintLayout rootView,
-      @NonNull FrameLayout cameraContainer, @NonNull TextView detailTextView,
-      @NonNull MaterialCardView metricsCard, @NonNull TextView metricsTextView,
-      @NonNull OverlayView overlayView, @NonNull MaterialButton permissionButton,
-      @NonNull PreviewView previewView, @NonNull MaterialButton recalibrateButton,
-      @NonNull MaterialButton resolution640Button, @NonNull MaterialButton resolution720Button,
-      @NonNull MaterialButtonToggleGroup resolutionToggleGroup, @NonNull TextView statusTextView) {
+      @NonNull TextView calibrationStepTextView, @NonNull FrameLayout cameraContainer,
+      @NonNull TextView detailTextView, @NonNull MaterialCardView metricsCard,
+      @NonNull TextView metricsTextView, @NonNull OverlayView overlayView,
+      @NonNull MaterialButton permissionButton, @NonNull PreviewView previewView,
+      @NonNull MaterialButton recalibrateButton, @NonNull MaterialButton resolution640Button,
+      @NonNull MaterialButton resolution720Button,
+      @NonNull MaterialButtonToggleGroup resolutionToggleGroup,
+      @NonNull MaterialCardView statusCard, @NonNull TextView statusTextView) {
     this.rootView = rootView;
+    this.calibrationStepTextView = calibrationStepTextView;
     this.cameraContainer = cameraContainer;
     this.detailTextView = detailTextView;
     this.metricsCard = metricsCard;
@@ -80,6 +89,7 @@ public final class ActivityMainBinding implements ViewBinding {
     this.resolution640Button = resolution640Button;
     this.resolution720Button = resolution720Button;
     this.resolutionToggleGroup = resolutionToggleGroup;
+    this.statusCard = statusCard;
     this.statusTextView = statusTextView;
   }
 
@@ -110,6 +120,12 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.calibrationStepTextView;
+      TextView calibrationStepTextView = ViewBindings.findChildViewById(rootView, id);
+      if (calibrationStepTextView == null) {
+        break missingId;
+      }
+
       id = R.id.cameraContainer;
       FrameLayout cameraContainer = ViewBindings.findChildViewById(rootView, id);
       if (cameraContainer == null) {
@@ -176,16 +192,22 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.statusCard;
+      MaterialCardView statusCard = ViewBindings.findChildViewById(rootView, id);
+      if (statusCard == null) {
+        break missingId;
+      }
+
       id = R.id.statusTextView;
       TextView statusTextView = ViewBindings.findChildViewById(rootView, id);
       if (statusTextView == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((ConstraintLayout) rootView, cameraContainer, detailTextView,
-          metricsCard, metricsTextView, overlayView, permissionButton, previewView,
-          recalibrateButton, resolution640Button, resolution720Button, resolutionToggleGroup,
-          statusTextView);
+      return new ActivityMainBinding((ConstraintLayout) rootView, calibrationStepTextView,
+          cameraContainer, detailTextView, metricsCard, metricsTextView, overlayView,
+          permissionButton, previewView, recalibrateButton, resolution640Button,
+          resolution720Button, resolutionToggleGroup, statusCard, statusTextView);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

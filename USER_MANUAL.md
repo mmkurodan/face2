@@ -48,15 +48,15 @@ App Flow & UI Walkthrough
 Main screen elements:
 - Camera preview: live feed from the front camera.
 - Overlay: drawn gaze/landmark indicators (OverlayView).
-- Status message: shows initialization, prompts, or tracking state. Typical messages:
+- Status card: shows initialization, prompts, calibration step position, and tracking state. The resolution selector is also embedded in this upper card. Typical messages:
   - "Initializing camera and face landmarker..."
-  - "Front camera ready. Hold the phone comfortably and follow the on-screen calibration dot."
+  - "Ready to start calibration"
   - "No face detected. Center one face in the preview."
   - "Gaze tracking live"
   - "Dwell detected"
 - Controls:
-  - Resolution selector (640x480, 720p)
-  - Recalibrate button
+  - Resolution selector (640x480, 720p) inside the upper status card
+  - Start calibration / Recalibrate button
   - Permission helper buttons (Grant camera permission / Open app settings)
 
 Calibration Instructions
@@ -64,9 +64,10 @@ Calibration Instructions
 Accurate gaze estimation depends on a short calibration step.
 1. Hold the phone at a comfortable, typical viewing distance and orientation.
 2. Ensure both eyes are visible in the preview and the face is well-lit.
-3. Follow the on-screen dot with your eyes (do not move your head unnecessarily). The app collects a short center-fixation calibration and displays progress as "Calibration X%".
-4. When calibration completes the status will change to "Gaze tracking live".
-5. If tracking is unstable, tap "Recalibrate" and repeat the steps.
+3. Tap "Start calibration" (or "Recalibrate") and then tap the Start button in the popup.
+4. The app shows the current calibration step as "Calibration step 1/2" or "Calibration step 2/2" in the upper status card.
+5. When prompted, look at the center dot with your eyes and keep both your head and the phone as steady as possible. The app collects a short center-fixation calibration and displays progress as "Calibration X%".
+6. When calibration completes the status will change to "Gaze tracking live".
 
 Tips for good calibration:
 - Keep ambient lighting even (avoid backlight and strong shadows).

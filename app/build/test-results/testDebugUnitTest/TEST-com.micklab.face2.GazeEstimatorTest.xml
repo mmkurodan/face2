@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.micklab.face2.GazeEstimatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-04-15T13:57:31" hostname="localhost" time="0.02">
+<testsuite name="com.micklab.face2.GazeEstimatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-04-15T23:07:08" hostname="localhost" time="0.018">
   <properties/>
-  <testcase name="movesRightWhenBothEyesShiftRight" classname="com.micklab.face2.GazeEstimatorTest" time="0.018"/>
-  <testcase name="mapsNeutralFrameToScreenCenterAfterCalibration" classname="com.micklab.face2.GazeEstimatorTest" time="0.001"/>
-  <testcase name="enablesDwellAfterStableFrames" classname="com.micklab.face2.GazeEstimatorTest" time="0.001"/>
+  <testcase name="movesRightWhenBothEyesShiftRight" classname="com.micklab.face2.GazeEstimatorTest" time="0.016"/>
+  <testcase name="mapsNeutralFrameToScreenCenterAfterCalibration" classname="com.micklab.face2.GazeEstimatorTest" time="0.0"/>
+  <testcase name="enablesDwellAfterStableFrames" classname="com.micklab.face2.GazeEstimatorTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

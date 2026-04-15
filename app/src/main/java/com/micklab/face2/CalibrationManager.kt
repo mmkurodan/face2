@@ -41,6 +41,21 @@ class CalibrationManager(
         }
     }
 
+    fun preview(features: FrameFeatures): State {
+        if (baseline != null) {
+            return currentState()
+        }
+
+        lastMessage = if (canCapture(features)) {
+            DEFAULT_GUIDANCE
+        } else {
+            buildGuidance(features)
+        }
+        return currentState()
+    }
+
+    fun canCapture(features: FrameFeatures): Boolean = isUsable(features)
+
     fun capture(features: FrameFeatures): State {
         if (baseline != null) {
             return currentState()
@@ -62,9 +77,7 @@ class CalibrationManager(
             features.faceConfidence >= minConfidence &&
             abs(features.yaw) < 24f &&
             abs(features.pitch) < 20f &&
-            abs(features.roll) < 18f &&
-            abs(features.eyeCenter.x - 0.5f) < 0.24f &&
-            abs(features.eyeCenter.y - 0.5f) < 0.22f
+            abs(features.roll) < 18f
     }
 
     private fun buildCalibration(samples: List<FrameFeatures>): CalibrationData {
@@ -107,8 +120,6 @@ class CalibrationManager(
                 "Hold the phone steady until the face mesh locks on."
             abs(features.yaw) >= 24f || abs(features.pitch) >= 20f || abs(features.roll) >= 18f ->
                 "Face the screen straight on while calibrating."
-            abs(features.eyeCenter.x - 0.5f) >= 0.24f || abs(features.eyeCenter.y - 0.5f) >= 0.22f ->
-                "Center your face and keep looking at the center target."
             else -> DEFAULT_GUIDANCE
         }
     }

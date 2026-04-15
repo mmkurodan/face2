@@ -33,10 +33,10 @@
             file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
             line="31"
             column="36"
-            startOffset="2609"
+            startOffset="2643"
             endLine="31"
             endColumn="253"
-            endOffset="2826"/>
+            endOffset="2860"/>
     </incident>
 
     <incident

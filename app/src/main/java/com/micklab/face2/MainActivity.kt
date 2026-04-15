@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     companion object {
         private const val CALIBRATION_TOTAL_STEPS = 2
         private const val CALIBRATION_CAPTURE_FEEDBACK_DURATION_MS = 1200L
-        private const val CALIBRATION_CAPTURE_FRAME_GRACE_MS = 350L
+        private const val CALIBRATION_CAPTURE_FRAME_GRACE_MS = 1200L
     }
 
     private val permissionLauncher =
@@ -145,10 +145,15 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
                 return@runOnUiThread
             }
 
-            rememberCalibrationCapture(
-                frameResult = frameResult,
-                features = features,
-            )
+            if (!calibrationState.isCalibrated && isCalibrationCapturePending) {
+                calibrationState = calibrationManager.preview(features)
+            }
+            if (calibrationManager.canCapture(features)) {
+                rememberCalibrationCapture(
+                    frameResult = frameResult,
+                    features = features,
+                )
+            }
 
             val estimate = if (calibrationState.isCalibrated) {
                 gazeEstimator.estimate(features)
@@ -191,6 +196,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
                 showCalibrationTarget = shouldShowCalibrationTarget(),
                 calibrationProgress = calibrationOverlayProgress(),
             )
+            updateTrackingSurfaceVisibility()
             updateCalibrationChrome()
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
@@ -304,6 +310,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         }
         binding.detailTextView.text = buildStandbyDetail()
         binding.metricsTextView.text = buildMetricsPlaceholder()
+        updateTrackingSurfaceVisibility()
         updateCalibrationChrome()
         maybeShowInitialCalibrationStartDialog()
     }
@@ -326,6 +333,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             showCalibrationTarget = shouldShowCalibrationTarget(),
             calibrationProgress = calibrationOverlayProgress(),
         )
+        updateTrackingSurfaceVisibility()
         updateCalibrationChrome()
     }
 
@@ -346,6 +354,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         binding.detailTextView.text = getString(R.string.metrics_permission_help)
         binding.metricsTextView.text = buildMetricsPlaceholder()
         binding.overlayView.clear()
+        updateTrackingSurfaceVisibility()
         updateCalibrationChrome()
     }
 
@@ -359,6 +368,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             showCalibrationTarget = shouldShowCalibrationTarget(),
             calibrationProgress = calibrationOverlayProgress(),
         )
+        updateTrackingSurfaceVisibility()
         updateCalibrationChrome()
     }
 
@@ -522,6 +532,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         isCalibrationCapturePending = true
         hasBegunCalibrationFlow = true
         calibrationCaptureFeedbackUntilMs = 0L
+        clearRecentCalibrationCapture()
         binding.statusTextView.text = getString(R.string.calibration_waiting_for_tap)
         binding.detailTextView.text = calibrationState.message
         binding.metricsTextView.text = buildMetricsPlaceholder()
@@ -529,6 +540,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             showCalibrationTarget = shouldShowCalibrationTarget(),
             calibrationProgress = calibrationOverlayProgress(),
         )
+        updateTrackingSurfaceVisibility()
         updateCalibrationChrome()
     }
 
@@ -541,13 +553,26 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
 
         val capture = latestCalibrationCapture()
         if (capture == null) {
-            showTrackingState(
-                frameResult = null,
-                features = null,
-                estimate = null,
-                headline = getString(R.string.status_no_face),
-                detail = buildNoFaceDetail(),
-            )
+            val currentFrameResult = latestFrameResult
+            val currentFeatures = latestFeatures
+            if (currentFeatures != null) {
+                calibrationState = calibrationManager.capture(currentFeatures)
+                showTrackingState(
+                    frameResult = currentFrameResult,
+                    features = currentFeatures,
+                    estimate = null,
+                    headline = buildStatusHeadline(estimate = null),
+                    detail = buildStatusDetail(currentFeatures, estimate = null),
+                )
+            } else {
+                showTrackingState(
+                    frameResult = null,
+                    features = null,
+                    estimate = null,
+                    headline = getString(R.string.status_no_face),
+                    detail = buildNoFaceDetail(),
+                )
+            }
             return
         }
         val (frameResult, features) = capture
@@ -640,6 +665,10 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     private fun shouldShowCalibrationCaptureFeedback(): Boolean {
         return calibrationState.isCalibrated &&
             calibrationCaptureFeedbackUntilMs > SystemClock.elapsedRealtime()
+    }
+
+    private fun updateTrackingSurfaceVisibility() {
+        binding.previewView.alpha = if (calibrationState.isCalibrated) 0f else 1f
     }
 
     private fun rememberCalibrationCapture(

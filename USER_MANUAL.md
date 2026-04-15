@@ -17,7 +17,7 @@ Quick Start
    - ./gradlew installDebug
    - or: adb install -r app/build/outputs/apk/debug/app-debug.apk
 4. Open the app on the device. Grant CAMERA permission when prompted.
-5. Start calibration, look at the on-screen center target, and tap that target to capture calibration. The app then shows "Gaze tracking live".
+5. Start calibration, look at the on-screen center target, and tap that target to capture calibration. The app then hides the face preview and shows "Gaze tracking live" so the screen can focus on the gaze cursor.
 
 System Requirements
 -------------------
@@ -46,12 +46,12 @@ Permissions & First Run
 App Flow & UI Walkthrough
 -------------------------
 Main screen elements:
-- Camera preview: live feed from the front camera.
+- Camera preview: live feed from the front camera while setting up and calibrating. The preview is hidden during live tracking so the display can act as the cursor surface.
 - Overlay: drawn gaze/landmark indicators (OverlayView).
 - Status card: shows initialization, prompts, calibration step position, and tracking state. The resolution selector is also embedded in this upper card. Typical messages:
   - "Initializing camera and face landmarker..."
   - "Ready to start calibration"
-  - "No face detected. Center one face in the preview."
+  - "No face detected. Keep one face visible to the front camera."
   - "Gaze tracking live"
   - "Dwell detected"
 - Controls:
@@ -66,7 +66,7 @@ Accurate gaze estimation depends on a short calibration step.
 2. Ensure both eyes are visible in the preview and the face is well-lit.
 3. Tap "Start calibration" (or "Recalibrate") and then tap the Start button in the popup.
 4. The app shows the current calibration step as "Calibration step 1/2" or "Calibration step 2/2" in the upper status card.
-5. When prompted, look at the center target with your eyes and tap that target while keeping both your head and the phone as steady as possible. The calibration uses the eye position at the tap timing.
+5. When prompted, look at the center target with your eyes and tap that target while keeping both your head and the phone as steady as possible. Calibration uses the freshest usable face sample near the tap timing, so your face must stay visible to the front camera even though it does not need to stay centered in the on-screen preview.
 6. The app shows a visual effect and a capture message so you know the tap was accepted, then the status changes to "Gaze tracking live".
 
 Tips for good calibration:
@@ -85,7 +85,7 @@ Problem: "Camera permission is required"
 - Solution: Tap "Grant camera permission" or open app settings and enable Camera permission.
 
 Problem: "No face detected"
-- Solution: Center your face in the preview, ensure both eyes are visible, increase lighting, remove obstructions.
+- Solution: Ensure your face stays visible to the front camera, both eyes are visible, lighting is sufficient, and nothing blocks the camera.
 
 Problem: Poor tracking accuracy
 - Solutions:

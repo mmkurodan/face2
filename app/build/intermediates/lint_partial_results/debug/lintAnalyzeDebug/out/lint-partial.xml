@@ -12,12 +12,12 @@
                     <map id="android.settings.APPLICATION_DETAILS_SETTINGS (used to start an activity)">
                         <location id="0"
                             file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/micklab/face2/MainActivity.kt"
-                            line="648"
+                            line="715"
                             column="22"
-                            startOffset="23393"
-                            endLine="651"
+                            startOffset="26116"
+                            endLine="718"
                             endColumn="10"
-                            endOffset="23525"/>
+                            endOffset="26248"/>
                     </map>
             </map>
     </map>
@@ -26,18 +26,18 @@
             file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
             line="20"
             column="13"
-            startOffset="1306"
+            startOffset="1302"
             endLine="20"
             endColumn="40"
-            endOffset="1333"/>
+            endOffset="1329"/>
         <location id="R.string.calibration_progress"
             file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
             line="21"
             column="13"
-            startOffset="1415"
+            startOffset="1411"
             endLine="21"
             endColumn="40"
-            endOffset="1442"/>
+            endOffset="1438"/>
         <entry
             name="model"
             string="attr[materialButtonOutlinedStyle(R)],color[panel_surface_strong(U),panel_text_primary(U),panel_text_secondary(U),panel_surface(U),overlay_target(U),overlay_target_progress(U),overlay_gaze_raw(U),overlay_gaze(U),overlay_gaze_outline(U),overlay_gaze_dwell(U)],id[cameraContainer(D),previewView(U),overlayView(U),statusCard(D),statusTextView(U),calibrationStepTextView(U),detailTextView(U),resolutionToggleGroup(U),resolution640Button(U),resolution720Button(U),permissionButton(U),recalibrateButton(U),metricsCard(D),metricsTextView(U)],layout[activity_main(U)],string[app_name(U),status_initializing(U),calibration_waiting_detail(U),resolution_title(U),resolution_640(U),resolution_720(U),grant_camera_permission(U),recalibrate(U),metrics_waiting(U),status_camera_ready(U),status_no_face(U),status_permission_required(U),status_error(U),status_align_face(U),status_ready_to_calibrate(U),status_tracking(U),status_dwell_active(U),open_app_settings(U),start_calibration(U),calibration_starting(D),calibration_progress(D),calibration_waiting_for_tap(U),calibration_captured(U),calibration_captured_detail(U),calibration_step_format(U),calibration_no_face_detail(U),calibration_start_dialog_title(U),calibration_start_dialog_message(U),calibration_dialog_start(U),metrics_permission_help(U)],style[Theme_Face2(U),Widget_Material3_Button(R),Theme_Material3_DayNight_NoActionBar(R)];19^1^1b^2^3^1c^1d^13^1e^0^1f^20^39^21^4^22,38^3a;;;"/>

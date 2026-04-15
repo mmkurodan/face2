@@ -10,12 +10,15 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import androidx.core.content.ContextCompat
 
 class OverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
+
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
 
     private val targetStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.overlay_target)
@@ -77,6 +80,12 @@ class OverlayView @JvmOverloads constructor(
     private var calibrationTargetTapListener: (() -> Unit)? = null
     private var tapEffectProgress: Float = 0f
     private var tapEffectAnimator: ValueAnimator? = null
+    private var isTrackingCalibrationTap: Boolean = false
+
+    init {
+        isClickable = true
+        isFocusable = true
+    }
 
     fun render(
         rawPoint: Vec2?,
@@ -158,19 +167,61 @@ class OverlayView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!showCalibrationTarget) {
+            isTrackingCalibrationTap = false
             return false
         }
 
         return when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> isWithinCalibrationTarget(event.x, event.y)
+            MotionEvent.ACTION_DOWN -> {
+                val handled = isWithinCalibrationTarget(
+                    x = event.x,
+                    y = event.y,
+                    extraRadius = touchSlop,
+                )
+                isTrackingCalibrationTap = handled
+                if (handled) {
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                handled
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!isTrackingCalibrationTap) {
+                    false
+                } else {
+                    val isStillWithinTarget = isWithinCalibrationTarget(
+                        x = event.x,
+                        y = event.y,
+                        extraRadius = touchSlop,
+                    )
+                    if (!isStillWithinTarget) {
+                        isTrackingCalibrationTap = false
+                        parent?.requestDisallowInterceptTouchEvent(false)
+                    }
+                    true
+                }
+            }
             MotionEvent.ACTION_UP -> {
-                if (!isWithinCalibrationTarget(event.x, event.y)) {
+                val shouldTriggerTap = isTrackingCalibrationTap &&
+                    isWithinCalibrationTarget(
+                        x = event.x,
+                        y = event.y,
+                        extraRadius = touchSlop,
+                    )
+                isTrackingCalibrationTap = false
+                parent?.requestDisallowInterceptTouchEvent(false)
+                if (!shouldTriggerTap) {
                     false
                 } else {
                     calibrationTargetTapListener?.invoke()
                     performClick()
                     true
                 }
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                val handled = isTrackingCalibrationTap
+                isTrackingCalibrationTap = false
+                parent?.requestDisallowInterceptTouchEvent(false)
+                handled
             }
             else -> false
         }
@@ -257,10 +308,11 @@ class OverlayView @JvmOverloads constructor(
     private fun isWithinCalibrationTarget(
         x: Float,
         y: Float,
+        extraRadius: Float = 0f,
     ): Boolean {
         val centerX = width * 0.5f
         val centerY = height * 0.5f
-        val hitRadius = dp(48f)
+        val hitRadius = dp(48f) + extraRadius
         val dx = x - centerX
         val dy = y - centerY
         return (dx * dx) + (dy * dy) <= hitRadius * hitRadius

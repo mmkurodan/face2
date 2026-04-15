@@ -52,6 +52,9 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     private var selectedResolution = CameraResolution.VGA
     private var latestFrameResult: FaceMeshProcessor.FrameResult? = null
     private var latestFeatures: FrameFeatures? = null
+    private var latestCalibrationFrameResult: FaceMeshProcessor.FrameResult? = null
+    private var latestCalibrationFeatures: FrameFeatures? = null
+    private var latestCalibrationFrameTimestampMs: Long = 0L
     private var calibrationCaptureFeedbackUntilMs: Long = 0L
     private var calibrationState = CalibrationManager.State.pending(
         requiredSamples = CalibrationManager.DEFAULT_REQUIRED_SAMPLES,
@@ -61,6 +64,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     companion object {
         private const val CALIBRATION_TOTAL_STEPS = 2
         private const val CALIBRATION_CAPTURE_FEEDBACK_DURATION_MS = 1200L
+        private const val CALIBRATION_CAPTURE_FRAME_GRACE_MS = 350L
     }
 
     private val permissionLauncher =
@@ -140,6 +144,11 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
                 )
                 return@runOnUiThread
             }
+
+            rememberCalibrationCapture(
+                frameResult = frameResult,
+                features = features,
+            )
 
             val estimate = if (calibrationState.isCalibrated) {
                 gazeEstimator.estimate(features)
@@ -325,6 +334,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         imageAnalysis?.clearAnalyzer()
         imageAnalysis = null
         cameraProvider = null
+        clearRecentCalibrationCapture()
 
         binding.permissionButton.visibility = View.VISIBLE
         binding.recalibrateButton.isEnabled = false
@@ -527,9 +537,10 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             return
         }
 
-        val frameResult = latestFrameResult
-        val features = latestFeatures
-        if (frameResult == null || features == null) {
+        binding.overlayView.triggerCalibrationCaptureEffect()
+
+        val capture = latestCalibrationCapture()
+        if (capture == null) {
             showTrackingState(
                 frameResult = null,
                 features = null,
@@ -539,6 +550,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             )
             return
         }
+        val (frameResult, features) = capture
 
         calibrationState = calibrationManager.capture(features)
         calibrationState.baseline?.let { baseline ->
@@ -551,7 +563,6 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             isCalibrationCapturePending = false
             calibrationCaptureFeedbackUntilMs =
                 SystemClock.elapsedRealtime() + CALIBRATION_CAPTURE_FEEDBACK_DURATION_MS
-            binding.overlayView.triggerCalibrationCaptureEffect()
         }
 
         val estimate = if (calibrationState.isCalibrated) {
@@ -629,6 +640,33 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     private fun shouldShowCalibrationCaptureFeedback(): Boolean {
         return calibrationState.isCalibrated &&
             calibrationCaptureFeedbackUntilMs > SystemClock.elapsedRealtime()
+    }
+
+    private fun rememberCalibrationCapture(
+        frameResult: FaceMeshProcessor.FrameResult,
+        features: FrameFeatures,
+    ) {
+        latestCalibrationFrameResult = frameResult
+        latestCalibrationFeatures = features
+        latestCalibrationFrameTimestampMs = frameResult.timestampMs
+    }
+
+    private fun clearRecentCalibrationCapture() {
+        latestCalibrationFrameResult = null
+        latestCalibrationFeatures = null
+        latestCalibrationFrameTimestampMs = 0L
+    }
+
+    private fun latestCalibrationCapture(): Pair<FaceMeshProcessor.FrameResult, FrameFeatures>? {
+        val frameResult = latestCalibrationFrameResult ?: return null
+        val features = latestCalibrationFeatures ?: return null
+        if (
+            SystemClock.uptimeMillis() - latestCalibrationFrameTimestampMs >
+            CALIBRATION_CAPTURE_FRAME_GRACE_MS
+        ) {
+            return null
+        }
+        return frameResult to features
     }
 
     private fun hasCameraPermission(): Boolean {

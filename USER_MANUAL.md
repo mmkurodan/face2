@@ -17,7 +17,7 @@ Quick Start
    - ./gradlew installDebug
    - or: adb install -r app/build/outputs/apk/debug/app-debug.apk
 4. Open the app on the device. Grant CAMERA permission when prompted.
-5. Follow the on-screen calibration dot until the app shows "Gaze tracking live".
+5. Start calibration, look at the on-screen center target, and tap that target to capture calibration. The app then shows "Gaze tracking live".
 
 System Requirements
 -------------------
@@ -66,8 +66,8 @@ Accurate gaze estimation depends on a short calibration step.
 2. Ensure both eyes are visible in the preview and the face is well-lit.
 3. Tap "Start calibration" (or "Recalibrate") and then tap the Start button in the popup.
 4. The app shows the current calibration step as "Calibration step 1/2" or "Calibration step 2/2" in the upper status card.
-5. When prompted, look at the center dot with your eyes and keep both your head and the phone as steady as possible. The app collects a short center-fixation calibration and displays progress as "Calibration X%".
-6. When calibration completes the status will change to "Gaze tracking live".
+5. When prompted, look at the center target with your eyes and tap that target while keeping both your head and the phone as steady as possible. The calibration uses the eye position at the tap timing.
+6. The app shows a visual effect and a capture message so you know the tap was accepted, then the status changes to "Gaze tracking live".
 
 Tips for good calibration:
 - Keep ambient lighting even (avoid backlight and strong shadows).

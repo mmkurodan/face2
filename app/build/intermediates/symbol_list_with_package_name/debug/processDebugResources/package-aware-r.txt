@@ -3872,6 +3872,8 @@ string bottomsheet_action_expand
 string bottomsheet_action_expand_halfway
 string bottomsheet_drag_handle_clicked
 string bottomsheet_drag_handle_content_description
+string calibration_captured
+string calibration_captured_detail
 string calibration_dialog_start
 string calibration_no_face_detail
 string calibration_progress
@@ -3880,6 +3882,7 @@ string calibration_start_dialog_title
 string calibration_starting
 string calibration_step_format
 string calibration_waiting_detail
+string calibration_waiting_for_tap
 string call_notification_answer_action
 string call_notification_answer_video_action
 string call_notification_decline_action

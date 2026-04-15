@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Range
 import android.util.Size
@@ -30,7 +31,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.math.roundToInt
 
 @ExperimentalMirrorMode
 class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
@@ -47,9 +47,12 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     private var hasRequestedPermission = false
     private var hasBegunCalibrationFlow = false
     private var hasShownInitialCalibrationDialog = false
-    private var isCalibrationSamplingActive = false
+    private var isCalibrationCapturePending = false
     private var calibrationStartDialog: AlertDialog? = null
     private var selectedResolution = CameraResolution.VGA
+    private var latestFrameResult: FaceMeshProcessor.FrameResult? = null
+    private var latestFeatures: FrameFeatures? = null
+    private var calibrationCaptureFeedbackUntilMs: Long = 0L
     private var calibrationState = CalibrationManager.State.pending(
         requiredSamples = CalibrationManager.DEFAULT_REQUIRED_SAMPLES,
         message = CalibrationManager.DEFAULT_GUIDANCE,
@@ -57,6 +60,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
 
     companion object {
         private const val CALIBRATION_TOTAL_STEPS = 2
+        private const val CALIBRATION_CAPTURE_FEEDBACK_DURATION_MS = 1200L
     }
 
     private val permissionLauncher =
@@ -123,6 +127,9 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         )
 
         runOnUiThread {
+            latestFrameResult = frameResult
+            latestFeatures = features
+
             if (features == null) {
                 showTrackingState(
                     frameResult = frameResult,
@@ -134,50 +141,26 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
                 return@runOnUiThread
             }
 
-            if (isCalibrationSamplingActive) {
-                calibrationState = calibrationManager.consume(features)
-                calibrationState.baseline?.let { baseline ->
-                    if (gazeEstimator.calibration() !== baseline) {
-                        gazeEstimator.setCalibration(baseline)
-                    }
-                }
-                if (calibrationState.isCalibrated) {
-                    isCalibrationSamplingActive = false
-                }
-            }
-
             val estimate = if (calibrationState.isCalibrated) {
                 gazeEstimator.estimate(features)
             } else {
                 null
             }
 
-            val headline = when {
-                isCalibrationSamplingActive ->
-                    getString(R.string.calibration_progress, (calibrationState.progress * 100f).roundToInt())
-                !calibrationState.isCalibrated -> getString(R.string.status_ready_to_calibrate)
-                estimate?.isDwelling == true -> getString(R.string.status_dwell_active)
-                else -> getString(R.string.status_tracking)
-            }
-            val detail = when {
-                isCalibrationSamplingActive -> calibrationState.message
-                !calibrationState.isCalibrated -> buildStandbyDetail()
-                estimate != null -> buildTrackingDetail(features, estimate)
-                else -> getString(R.string.status_camera_ready)
-            }
-
             showTrackingState(
                 frameResult = frameResult,
                 features = features,
                 estimate = estimate,
-                headline = headline,
-                detail = detail,
+                headline = buildStatusHeadline(estimate),
+                detail = buildStatusDetail(features, estimate),
             )
         }
     }
 
     override fun onNoFaceDetected() {
         runOnUiThread {
+            latestFrameResult = null
+            latestFeatures = null
             showTrackingState(
                 frameResult = null,
                 features = null,
@@ -190,6 +173,8 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
 
     override fun onError(message: String) {
         runOnUiThread {
+            latestFrameResult = null
+            latestFeatures = null
             binding.statusTextView.text = getString(R.string.status_error, message)
             binding.detailTextView.text = buildStandbyDetail()
             binding.metricsTextView.text = buildMetricsPlaceholder()
@@ -203,6 +188,8 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
     }
 
     private fun configureControls() {
+        binding.overlayView.setOnCalibrationTargetTapListener(::captureCalibrationFromTargetTap)
+
         binding.permissionButton.setOnClickListener {
             if (shouldOpenAppSettings()) {
                 openAppSettings()
@@ -302,8 +289,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         )
 
         binding.statusTextView.text = when {
-            isCalibrationSamplingActive ->
-                getString(R.string.calibration_progress, (calibrationState.progress * 100f).roundToInt())
+            isCalibrationCapturePending -> getString(R.string.calibration_waiting_for_tap)
             calibrationState.isCalibrated -> getString(R.string.status_tracking)
             else -> getString(R.string.status_ready_to_calibrate)
         }
@@ -454,7 +440,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
 
     private fun buildStandbyDetail(): String {
         return when {
-            isCalibrationSamplingActive -> calibrationState.message
+            isCalibrationCapturePending -> calibrationState.message
             !calibrationState.isCalibrated -> getString(R.string.calibration_waiting_detail)
             else -> getString(R.string.status_camera_ready)
         }
@@ -462,7 +448,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
 
     private fun buildNoFaceDetail(): String {
         return when {
-            isCalibrationSamplingActive -> getString(R.string.calibration_no_face_detail)
+            isCalibrationCapturePending -> getString(R.string.calibration_no_face_detail)
             !calibrationState.isCalibrated -> getString(R.string.calibration_waiting_detail)
             else -> getString(R.string.status_align_face)
         }
@@ -523,9 +509,10 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         calibrationStartDialog = null
         calibrationState = calibrationManager.beginCalibration()
         gazeEstimator.clearCalibration()
-        isCalibrationSamplingActive = true
+        isCalibrationCapturePending = true
         hasBegunCalibrationFlow = true
-        binding.statusTextView.text = getString(R.string.calibration_starting)
+        calibrationCaptureFeedbackUntilMs = 0L
+        binding.statusTextView.text = getString(R.string.calibration_waiting_for_tap)
         binding.detailTextView.text = calibrationState.message
         binding.metricsTextView.text = buildMetricsPlaceholder()
         binding.overlayView.clear(
@@ -535,6 +522,53 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         updateCalibrationChrome()
     }
 
+    private fun captureCalibrationFromTargetTap() {
+        if (!isCalibrationCapturePending || calibrationState.isCalibrated) {
+            return
+        }
+
+        val frameResult = latestFrameResult
+        val features = latestFeatures
+        if (frameResult == null || features == null) {
+            showTrackingState(
+                frameResult = null,
+                features = null,
+                estimate = null,
+                headline = getString(R.string.status_no_face),
+                detail = buildNoFaceDetail(),
+            )
+            return
+        }
+
+        calibrationState = calibrationManager.capture(features)
+        calibrationState.baseline?.let { baseline ->
+            if (gazeEstimator.calibration() !== baseline) {
+                gazeEstimator.setCalibration(baseline)
+            }
+        }
+
+        if (calibrationState.isCalibrated) {
+            isCalibrationCapturePending = false
+            calibrationCaptureFeedbackUntilMs =
+                SystemClock.elapsedRealtime() + CALIBRATION_CAPTURE_FEEDBACK_DURATION_MS
+            binding.overlayView.triggerCalibrationCaptureEffect()
+        }
+
+        val estimate = if (calibrationState.isCalibrated) {
+            gazeEstimator.estimate(features)
+        } else {
+            null
+        }
+
+        showTrackingState(
+            frameResult = frameResult,
+            features = features,
+            estimate = estimate,
+            headline = buildStatusHeadline(estimate),
+            detail = buildStatusDetail(features, estimate),
+        )
+    }
+
     private fun updateCalibrationChrome() {
         val currentStep = currentCalibrationStep()
         binding.calibrationStepTextView.isVisible = currentStep != null
@@ -542,7 +576,7 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
             getString(R.string.calibration_step_format, step.first, step.second)
         }.orEmpty()
         binding.recalibrateButton.text = getString(
-            if (!hasBegunCalibrationFlow && !isCalibrationSamplingActive && !calibrationState.isCalibrated) {
+            if (!hasBegunCalibrationFlow && !isCalibrationCapturePending && !calibrationState.isCalibrated) {
                 R.string.start_calibration
             } else {
                 R.string.recalibrate
@@ -556,18 +590,45 @@ class MainActivity : AppCompatActivity(), FaceMeshProcessor.Listener {
         }
 
         return when {
-            isCalibrationSamplingActive -> 2 to CALIBRATION_TOTAL_STEPS
+            isCalibrationCapturePending -> 2 to CALIBRATION_TOTAL_STEPS
             !hasBegunCalibrationFlow && !calibrationState.isCalibrated -> 1 to CALIBRATION_TOTAL_STEPS
             else -> null
         }
     }
 
     private fun shouldShowCalibrationTarget(): Boolean {
-        return isCalibrationSamplingActive && !calibrationState.isCalibrated
+        return isCalibrationCapturePending && !calibrationState.isCalibrated
     }
 
     private fun calibrationOverlayProgress(): Float {
-        return if (shouldShowCalibrationTarget()) calibrationState.progress else 0f
+        return 0f
+    }
+
+    private fun buildStatusHeadline(estimate: GazeEstimate?): String {
+        return when {
+            shouldShowCalibrationCaptureFeedback() -> getString(R.string.calibration_captured)
+            isCalibrationCapturePending -> getString(R.string.calibration_waiting_for_tap)
+            !calibrationState.isCalibrated -> getString(R.string.status_ready_to_calibrate)
+            estimate?.isDwelling == true -> getString(R.string.status_dwell_active)
+            else -> getString(R.string.status_tracking)
+        }
+    }
+
+    private fun buildStatusDetail(
+        features: FrameFeatures,
+        estimate: GazeEstimate?,
+    ): String {
+        return when {
+            shouldShowCalibrationCaptureFeedback() -> getString(R.string.calibration_captured_detail)
+            isCalibrationCapturePending -> calibrationState.message
+            estimate != null -> buildTrackingDetail(features, estimate)
+            else -> getString(R.string.status_camera_ready)
+        }
+    }
+
+    private fun shouldShowCalibrationCaptureFeedback(): Boolean {
+        return calibrationState.isCalibrated &&
+            calibrationCaptureFeedbackUntilMs > SystemClock.elapsedRealtime()
     }
 
     private fun hasCameraPermission(): Boolean {

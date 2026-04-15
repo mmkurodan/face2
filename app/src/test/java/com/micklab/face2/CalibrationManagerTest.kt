@@ -9,26 +9,24 @@ import org.junit.Test
 class CalibrationManagerTest {
 
     @Test
-    fun completesCalibrationAfterStableSamples() {
-        val manager = CalibrationManager(requiredSampleCount = 3)
+    fun capturesCalibrationFromTappedFrame() {
+        val manager = CalibrationManager()
         manager.beginCalibration()
 
-        var state = manager.currentState()
-        repeat(3) { index ->
-            state = manager.consume(TestFixtures.frame(timestampMs = index.toLong()))
-        }
+        val state = manager.capture(TestFixtures.frame(timestampMs = 0L))
 
         assertTrue(state.isCalibrated)
         assertEquals(1f, state.progress, 0.0001f)
+        assertEquals(1, state.sampleCount)
         assertNotNull(state.baseline)
     }
 
     @Test
-    fun ignoresLowConfidenceFrames() {
-        val manager = CalibrationManager(requiredSampleCount = 3)
+    fun ignoresLowConfidenceTap() {
+        val manager = CalibrationManager()
         manager.beginCalibration()
 
-        val state = manager.consume(
+        val state = manager.capture(
             TestFixtures.frame(
                 timestampMs = 0L,
                 faceConfidence = 0.2f,

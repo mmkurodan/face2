@@ -17,13 +17,16 @@
     <string name="resolution_title">Resolution</string>
     <string name="resolution_640">VGA</string>
     <string name="resolution_720">HD</string>
-    <string name="calibration_starting">Look at the center dot and hold steady to calibrate</string>
+    <string name="calibration_starting">Look at the center target and tap it to capture calibration</string>
     <string name="calibration_progress">Calibration %1$d%%</string>
+    <string name="calibration_waiting_for_tap">Look at and tap the center target</string>
+    <string name="calibration_captured">Calibration captured</string>
+    <string name="calibration_captured_detail">Tap registered. Live gaze tracking is now using that target position.</string>
     <string name="calibration_step_format">Calibration step %1$d/%2$d</string>
-    <string name="calibration_waiting_detail">Center your face, make sure both eyes stay visible, then press Start in the popup.</string>
-    <string name="calibration_no_face_detail">Center your face, then keep looking at the middle dot when the prompt starts.</string>
+    <string name="calibration_waiting_detail">Center your face, make sure both eyes stay visible, then press Start. When the target appears, look at it and tap it to capture calibration.</string>
+    <string name="calibration_no_face_detail">Center your face, then look at and tap the middle target to capture calibration.</string>
     <string name="calibration_start_dialog_title">Start calibration</string>
-    <string name="calibration_start_dialog_message">Step 1 of 2: Center your face in the preview and keep both eyes visible.\n\nStep 2 of 2: After tapping Start, look at the center dot and keep both your head and phone as steady as possible.</string>
+    <string name="calibration_start_dialog_message">Step 1 of 2: Center your face in the preview and keep both eyes visible.\n\nStep 2 of 2: After tapping Start, look at the center target and tap it while keeping both your head and phone as steady as possible.</string>
     <string name="calibration_dialog_start">Start</string>
     <string name="metrics_waiting">Inference: -- ms\nResolution: --\nCalibration samples: --\nFace conf: --  left: --  right: --\nPose: yaw=--  pitch=--  roll=--\nAnchors: nose=(--, --) eyes=(--, --)\nRaw gaze: --\nSmooth gaze: --\nScale correction: --</string>
     <string name="metrics_permission_help">Tap the button above to grant Camera permission. If permission was permanently denied, open the app settings and enable Camera.</string>

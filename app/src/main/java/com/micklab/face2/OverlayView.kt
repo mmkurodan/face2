@@ -1,10 +1,14 @@
 package com.micklab.face2
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 
@@ -30,6 +34,17 @@ class OverlayView @JvmOverloads constructor(
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeWidth = dp(4f)
+    }
+
+    private val tapEffectPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.overlay_target_progress)
+        style = Paint.Style.STROKE
+        strokeWidth = dp(3f)
+    }
+
+    private val tapEffectFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.overlay_target_progress)
+        style = Paint.Style.FILL
     }
 
     private val rawPointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -59,6 +74,9 @@ class OverlayView @JvmOverloads constructor(
     private var isDwelling: Boolean = false
     private var showCalibrationTarget: Boolean = true
     private var calibrationProgress: Float = 0f
+    private var calibrationTargetTapListener: (() -> Unit)? = null
+    private var tapEffectProgress: Float = 0f
+    private var tapEffectAnimator: ValueAnimator? = null
 
     fun render(
         rawPoint: Vec2?,
@@ -77,6 +95,10 @@ class OverlayView @JvmOverloads constructor(
         invalidate()
     }
 
+    fun setOnCalibrationTargetTapListener(listener: (() -> Unit)?) {
+        calibrationTargetTapListener = listener
+    }
+
     fun clear(
         showCalibrationTarget: Boolean = false,
         calibrationProgress: Float = 0f,
@@ -91,6 +113,31 @@ class OverlayView @JvmOverloads constructor(
         )
     }
 
+    fun triggerCalibrationCaptureEffect() {
+        tapEffectAnimator?.cancel()
+        tapEffectAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 320L
+            addUpdateListener { animator ->
+                tapEffectProgress = animator.animatedValue as Float
+                invalidate()
+            }
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        tapEffectProgress = 0f
+                        invalidate()
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                        tapEffectProgress = 0f
+                        invalidate()
+                    }
+                },
+            )
+            start()
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (width == 0 || height == 0) {
@@ -103,6 +150,41 @@ class OverlayView @JvmOverloads constructor(
 
         rawPoint?.let { drawRawPoint(canvas, it) }
         smoothedPoint?.let { drawGazePoint(canvas, it) }
+
+        if (tapEffectProgress > 0f) {
+            drawCalibrationTapEffect(canvas)
+        }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!showCalibrationTarget) {
+            return false
+        }
+
+        return when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> isWithinCalibrationTarget(event.x, event.y)
+            MotionEvent.ACTION_UP -> {
+                if (!isWithinCalibrationTarget(event.x, event.y)) {
+                    false
+                } else {
+                    calibrationTargetTapListener?.invoke()
+                    performClick()
+                    true
+                }
+            }
+            else -> false
+        }
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    override fun onDetachedFromWindow() {
+        tapEffectAnimator?.cancel()
+        tapEffectAnimator = null
+        super.onDetachedFromWindow()
     }
 
     private fun drawCalibrationTarget(canvas: Canvas) {
@@ -133,6 +215,20 @@ class OverlayView @JvmOverloads constructor(
         }
     }
 
+    private fun drawCalibrationTapEffect(canvas: Canvas) {
+        val centerX = width * 0.5f
+        val centerY = height * 0.5f
+        val baseRadius = dp(20f)
+        val ringRadius = baseRadius + (dp(44f) * tapEffectProgress)
+        val fillRadius = dp(8f) + (dp(22f) * tapEffectProgress)
+        val alpha = ((1f - tapEffectProgress) * 255).toInt().coerceIn(0, 255)
+
+        tapEffectPaint.alpha = alpha
+        tapEffectFillPaint.alpha = (alpha * 0.32f).toInt().coerceIn(0, 96)
+        canvas.drawCircle(centerX, centerY, fillRadius, tapEffectFillPaint)
+        canvas.drawCircle(centerX, centerY, ringRadius, tapEffectPaint)
+    }
+
     private fun drawRawPoint(
         canvas: Canvas,
         point: Vec2,
@@ -157,6 +253,18 @@ class OverlayView @JvmOverloads constructor(
         x = x.coerceIn(0f, 1f) * width.toFloat(),
         y = y.coerceIn(0f, 1f) * height.toFloat(),
     )
+
+    private fun isWithinCalibrationTarget(
+        x: Float,
+        y: Float,
+    ): Boolean {
+        val centerX = width * 0.5f
+        val centerY = height * 0.5f
+        val hitRadius = dp(48f)
+        val dx = x - centerX
+        val dy = y - centerY
+        return (dx * dx) + (dy * dy) <= hitRadius * hitRadius
+    }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
 }

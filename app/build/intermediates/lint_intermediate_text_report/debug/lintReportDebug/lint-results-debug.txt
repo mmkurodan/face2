@@ -74,7 +74,28 @@
    performance if you pre-mix the background with your drawable and use that
    resulting image or color as a custom theme background instead.
 
-/root/face2/app/src/main/res/values/strings.xml:28: Warning: Replace "--" with an "em dash" character (—, &#8212;) ? [TypographyDashes]
+/root/face2/app/src/main/res/values/strings.xml:20: Warning: The resource R.string.calibration_starting appears to be unused [UnusedResources]
+    <string name="calibration_starting">Look at the center target and tap it to capture calibration</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/face2/app/src/main/res/values/strings.xml:21: Warning: The resource R.string.calibration_progress appears to be unused [UnusedResources]
+    <string name="calibration_progress">Calibration %1$d%%</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+/root/face2/app/src/main/res/values/strings.xml:31: Warning: Replace "--" with an "em dash" character (—, &#8212;) ? [TypographyDashes]
     <string name="metrics_waiting">Inference: -- ms\nResolution: --\nCalibration samples: --\nFace conf: --  left: --  right: --\nPose: yaw=--  pitch=--  roll=--\nAnchors: nose=(--, --) eyes=(--, --)\nRaw gaze: --\nSmooth gaze: --\nScale correction: --</string>
                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -108,4 +129,4 @@
 
    https://developer.android.com/studio/publish/preparing#publishing-configure
 
-0 errors, 15 warnings
+0 errors, 17 warnings

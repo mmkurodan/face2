@@ -31,12 +31,12 @@
             priority="0"/>
         <location
             file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
-            line="28"
+            line="31"
             column="36"
-            startOffset="2235"
-            endLine="28"
+            startOffset="2609"
+            endLine="31"
             endColumn="253"
-            endOffset="2452"/>
+            endOffset="2826"/>
     </incident>
 
     <incident

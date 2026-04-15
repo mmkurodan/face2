@@ -26,6 +26,8 @@ id statusCard
 id statusTextView
 layout activity_main
 string app_name
+string calibration_captured
+string calibration_captured_detail
 string calibration_dialog_start
 string calibration_no_face_detail
 string calibration_progress
@@ -34,6 +36,7 @@ string calibration_start_dialog_title
 string calibration_starting
 string calibration_step_format
 string calibration_waiting_detail
+string calibration_waiting_for_tap
 string grant_camera_permission
 string metrics_permission_help
 string metrics_waiting
